@@ -36,10 +36,15 @@ export default function InvidiaChat() {
     setError("");
 
     try {
+      // Build history for conversation memory (exclude streaming/error states)
+      const history = messages
+        .filter((m) => !m.isStreaming && !m.isError && m.content)
+        .map((m) => ({ type: m.type, content: m.content }));
+
       const res = await fetch("/api/ask-nvidia", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt: currentPrompt }),
+        body: JSON.stringify({ prompt: currentPrompt, history }),
       });
 
       if (!res.ok) {
@@ -71,8 +76,9 @@ export default function InvidiaChat() {
           if (data === "[DONE]") break;
 
           try {
+            // LangChain SSE format: { token: "..." }
             const json = JSON.parse(data);
-            const token = json.choices?.[0]?.delta?.content ?? "";
+            const token = json.token ?? "";
             if (token) {
               fullContent += token;
               // Update the bot message in place — no flicker
