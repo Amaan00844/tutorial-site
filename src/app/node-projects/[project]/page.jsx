@@ -25,7 +25,7 @@ export default function NodeProjectDetail() {
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(
-        `https://study-portal-backend-9zpf.onrender.com//api/projects/${slug}`,
+        `https://study-portal-backend-9zpf.onrender.com/api/projects/${slug}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         },

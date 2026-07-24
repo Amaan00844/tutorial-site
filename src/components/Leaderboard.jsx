@@ -47,7 +47,7 @@ export default function Leaderboard() {
         }
 
         const response = await fetch(
-          `https://study-portal-backend-9zpf.onrender.com//api/leaderboard`,
+          `https://study-portal-backend-9zpf.onrender.com/api/leaderboard`,
           {
             headers: { Authorization: `Bearer ${token}` },
           },

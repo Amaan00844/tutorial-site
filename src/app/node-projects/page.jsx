@@ -40,7 +40,7 @@ server.listen(3000, () => {
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(
-        "https://study-portal-backend-9zpf.onrender.com//api/projects?category=node",
+        "https://study-portal-backend-9zpf.onrender.com/api/projects?category=node",
         {
           headers: { Authorization: `Bearer ${token}` },
         },
@@ -72,7 +72,7 @@ server.listen(3000, () => {
       const userId = localStorage.getItem("userId");
       const token = localStorage.getItem("token");
       const response = await fetch(
-        `https://study-portal-backend-9zpf.onrender.com//api/scores?userId=${userId}`,
+        `https://study-portal-backend-9zpf.onrender.com/api/scores?userId=${userId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         },
@@ -103,7 +103,7 @@ server.listen(3000, () => {
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(
-        "https://study-portal-backend-9zpf.onrender.com//api/execute",
+        "https://study-portal-backend-9zpf.onrender.com/api/execute",
         {
           method: "POST",
           headers: {
@@ -137,7 +137,7 @@ server.listen(3000, () => {
       const userId = localStorage.getItem("userId");
       const token = localStorage.getItem("token");
       const response = await fetch(
-        "https://study-portal-backend-9zpf.onrender.com//api/scores",
+        "https://study-portal-backend-9zpf.onrender.com/api/scores",
         {
           method: "POST",
           headers: {

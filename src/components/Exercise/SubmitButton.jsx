@@ -6,7 +6,7 @@ const submitExercise = async ({
 }) => {
   try {
     const response = await fetch(
-      "https://study-portal-backend-9zpf.onrender.com//api/submit",
+      "https://study-portal-backend-9zpf.onrender.com/api/submit",
       {
         method: "POST",
         headers: {

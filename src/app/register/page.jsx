@@ -21,7 +21,7 @@ export default function RegisterPage() {
 
     try {
       const response = await fetch(
-        `https://study-portal-backend-9zpf.onrender.com//api/auth/register`, // Use the base URL
+        `https://study-portal-backend-9zpf.onrender.com/api/auth/register`, // Use the base URL
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

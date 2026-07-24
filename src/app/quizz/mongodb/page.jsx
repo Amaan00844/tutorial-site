@@ -59,7 +59,7 @@ export default function MongoDBQuizPage() {
       try {
         setLoading(true);
         const response = await fetch(
-          `https://study-portal-backend-9zpf.onrender.com//api/questions/${quizType}?difficulty=${difficultyLevel}`,
+          `https://study-portal-backend-9zpf.onrender.com/api/questions/${quizType}?difficulty=${difficultyLevel}`,
           {
             headers: {
               "x-auth-token": token,

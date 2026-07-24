@@ -23,7 +23,7 @@ export default function MongoDBProjectDetail() {
   const fetchProject = async () => {
     try {
       const response = await fetch(
-        `https://study-portal-backend-9zpf.onrender.com//api/projects/${slug}`,
+        `https://study-portal-backend-9zpf.onrender.com/api/projects/${slug}`,
         {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         },

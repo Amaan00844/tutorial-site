@@ -68,7 +68,7 @@ export default function QuizForm() {
 
     try {
       const response = await fetch(
-        "https://study-portal-backend-9zpf.onrender.com//api/auth/login",
+        "https://study-portal-backend-9zpf.onrender.com/api/auth/login",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

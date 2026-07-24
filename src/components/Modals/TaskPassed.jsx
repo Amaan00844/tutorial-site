@@ -186,7 +186,7 @@ export default function TestPassed({
       console.log("Submitting score:", { score, url, userId, type });
 
       const response = await fetch(
-        "https://study-portal-backend-9zpf.onrender.com//api/submit",
+        "https://study-portal-backend-9zpf.onrender.com/api/submit",
         {
           method: "POST",
           headers: {

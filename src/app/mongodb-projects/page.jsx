@@ -33,7 +33,7 @@ export default function MongoDBProjects() {
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(
-        "https://study-portal-backend-9zpf.onrender.com//api/projects?category=mongodb",
+        "https://study-portal-backend-9zpf.onrender.com/api/projects?category=mongodb",
         {
           headers: { Authorization: `Bearer ${token}` },
         },
@@ -65,7 +65,7 @@ export default function MongoDBProjects() {
       const userId = localStorage.getItem("userId");
       const token = localStorage.getItem("token");
       const response = await fetch(
-        `https://study-portal-backend-9zpf.onrender.com//api/scores?userId=${userId}`,
+        `https://study-portal-backend-9zpf.onrender.com/api/scores?userId=${userId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         },
@@ -98,7 +98,7 @@ export default function MongoDBProjects() {
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(
-        "https://study-portal-backend-9zpf.onrender.com//api/execute",
+        "https://study-portal-backend-9zpf.onrender.com/api/execute",
         {
           method: "POST",
           headers: {
@@ -133,7 +133,7 @@ export default function MongoDBProjects() {
       const userId = localStorage.getItem("userId");
       const token = localStorage.getItem("token");
       const response = await fetch(
-        "https://study-portal-backend-9zpf.onrender.com//api/scores",
+        "https://study-portal-backend-9zpf.onrender.com/api/scores",
         {
           method: "POST",
           headers: {
