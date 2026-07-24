@@ -1,5 +1,4 @@
-const NVIDIA_MODEL =
-  process.env.NVIDIA_MODEL || "meta/llama-3.2-3b-instruct";
+const NVIDIA_MODEL = process.env.NVIDIA_MODEL || "meta/llama-3.2-3b-instruct";
 const NVIDIA_URL = "https://integrate.api.nvidia.com/v1/chat/completions";
 
 export async function POST(request) {
@@ -40,26 +39,29 @@ export async function POST(request) {
         messages: [{ role: "user", content: prompt }],
         temperature: 0.7,
         max_tokens: 512,
+        stream: true, // ← Enable token-by-token streaming
       }),
     });
 
-    const data = await nvidiaRes.json();
-
     if (!nvidiaRes.ok) {
-      console.error("NVIDIA API error:", data);
+      const error = await nvidiaRes.json();
       return Response.json(
-        {
-          error:
-            data?.error?.message || "NVIDIA API error or quota limit reached.",
-        },
+        { error: error?.error?.message || "NVIDIA API error." },
         { status: 500 }
       );
     }
 
-    const text = data?.choices?.[0]?.message?.content || "";
-    return Response.json({ text }, { status: 200 });
+    // Pipe NVIDIA's SSE stream directly to the browser
+    return new Response(nvidiaRes.body, {
+      headers: {
+        "Content-Type": "text/event-stream",
+        "Cache-Control": "no-cache, no-transform",
+        Connection: "keep-alive",
+        "X-Accel-Buffering": "no", // Disable Nginx buffering on Vercel
+      },
+    });
   } catch (error) {
-    console.error("NVIDIA API error:", error);
+    console.error("NVIDIA stream error:", error);
     return Response.json(
       { error: "NVIDIA API error or quota limit reached." },
       { status: 500 }

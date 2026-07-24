@@ -8,7 +8,6 @@ export default function InvidiaChat() {
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef(null);
   const textareaRef = useRef(null);
 
@@ -21,13 +20,20 @@ export default function InvidiaChat() {
       content: prompt,
       timestamp: Date.now(),
     };
-    setMessages((prev) => [...prev, userMessage]);
+
+    // Unique timestamp for the bot reply we're about to stream into
+    const botTimestamp = Date.now() + 1;
+
+    setMessages((prev) => [
+      ...prev,
+      userMessage,
+      { type: "bot", content: "", timestamp: botTimestamp, isStreaming: true },
+    ]);
 
     const currentPrompt = prompt;
     setPrompt("");
     setLoading(true);
     setError("");
-    setIsTyping(true);
 
     try {
       const res = await fetch("/api/ask-nvidia", {
@@ -37,43 +43,83 @@ export default function InvidiaChat() {
       });
 
       if (!res.ok) {
-        throw new Error(`HTTP error! status: ${res.status}`);
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || `Server error: ${res.status}`);
       }
 
-      const data = await res.json();
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let fullContent = "";
+      let buffer = "";
 
-      // Simulate typing effect
-      setTimeout(() => {
-        const botMessage = {
-          type: "bot",
-          content: data.text || "No response from SkillBridge.",
-          timestamp: Date.now(),
-        };
-        setMessages((prev) => [...prev, botMessage]);
-        setIsTyping(false);
-      }, 500);
-    } catch (error) {
-      console.error("Error:", error);
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        // Accumulate chunks — a single read() may have partial SSE lines
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+
+        // Keep the last (possibly incomplete) line in the buffer
+        buffer = lines.pop() ?? "";
+
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (!trimmed.startsWith("data: ")) continue;
+
+          const data = trimmed.slice(6);
+          if (data === "[DONE]") break;
+
+          try {
+            const json = JSON.parse(data);
+            const token = json.choices?.[0]?.delta?.content ?? "";
+            if (token) {
+              fullContent += token;
+              // Update the bot message in place — no flicker
+              setMessages((prev) =>
+                prev.map((m) =>
+                  m.timestamp === botTimestamp
+                    ? { ...m, content: fullContent }
+                    : m
+                )
+              );
+            }
+          } catch {
+            // Skip malformed SSE chunks
+          }
+        }
+      }
+
+      // Mark streaming complete (removes blinking cursor)
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.timestamp === botTimestamp ? { ...m, isStreaming: false } : m
+        )
+      );
+    } catch (err) {
+      console.error("Stream error:", err);
       setError("Failed to connect to SkillBridge. Please try again.");
-      const errorMessage = {
-        type: "bot",
-        content:
-          "Sorry, I'm having trouble connecting right now. Please try again.",
-        timestamp: Date.now(),
-        isError: true,
-      };
-      setMessages((prev) => [...prev, errorMessage]);
-      setIsTyping(false);
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.timestamp === botTimestamp
+            ? {
+                ...m,
+                content:
+                  "Sorry, I'm having trouble connecting right now. Please try again.",
+                isError: true,
+                isStreaming: false,
+              }
+            : m
+        )
+      );
     } finally {
       setLoading(false);
     }
   };
 
   const toggleChat = () => {
-    setShowChat(!showChat);
-    if (!showChat) {
-      setError("");
-    }
+    setShowChat((v) => !v);
+    if (!showChat) setError("");
   };
 
   const clearChat = () => {
@@ -83,21 +129,30 @@ export default function InvidiaChat() {
   };
 
   const copyToClipboard = (text) => {
-    navigator.clipboard.writeText(text).catch((err) => {
-      console.error("Failed to copy text: ", err);
-    });
+    navigator.clipboard.writeText(text).catch(console.error);
   };
 
-  const formatResponse = (text) => {
+  const handleKeyPress = (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSubmit(e);
+    }
+  };
+
+  // Blinking cursor component shown while streaming
+  const BlinkingCursor = () => (
+    <span
+      className="inline-block w-[2px] h-4 bg-blue-500 ml-[1px] align-middle"
+      style={{ animation: "blink 0.8s step-end infinite" }}
+    />
+  );
+
+  const formatResponse = (text, isStreaming) => {
+    if (!text && isStreaming) return <BlinkingCursor />;
     if (!text) return null;
 
-    return text.split("\n").map((line, i) => {
-      // Handle code blocks
-      if (line.startsWith("```")) {
-        return null; // Skip code block markers for now
-      }
-
-      // Handle **text** for bold
+    const elements = text.split("\n").map((line, i) => {
+      // Bold **text**
       if (line.includes("**")) {
         const parts = line.split("**");
         return (
@@ -117,13 +172,13 @@ export default function InvidiaChat() {
                 >
                   {part}
                 </span>
-              ),
+              )
             )}
           </p>
         );
       }
 
-      // Handle * text for list items
+      // List items
       if (line.startsWith("* ") || line.startsWith("- ")) {
         return (
           <li
@@ -135,7 +190,7 @@ export default function InvidiaChat() {
         );
       }
 
-      // Handle numbered lists
+      // Numbered list
       if (line.match(/^\d+\.\s/)) {
         return (
           <li
@@ -147,7 +202,7 @@ export default function InvidiaChat() {
         );
       }
 
-      // Handle headings
+      // Headings
       if (line.match(/^#+\s/)) {
         const level = line.match(/^#+/)[0].length;
         const HeadingTag = `h${Math.min(6, level)}`;
@@ -159,16 +214,14 @@ export default function InvidiaChat() {
             key: i,
             className: `font-bold my-3 ${sizeClass} bg-gradient-to-r from-[#0f2027] via-[#203a43] to-[#2c5364] bg-clip-text text-transparent`,
           },
-          line.replace(/^#+\s/, ""),
+          line.replace(/^#+\s/, "")
         );
       }
 
-      // Handle empty lines
-      if (line.trim() === "") {
-        return <div key={i} className="h-2" />;
-      }
+      // Empty line
+      if (line.trim() === "") return <div key={i} className="h-2" />;
 
-      // Handle inline code
+      // Inline code
       if (line.includes("`")) {
         const parts = line.split("`");
         return (
@@ -188,7 +241,7 @@ export default function InvidiaChat() {
                 >
                   {part}
                 </span>
-              ),
+              )
             )}
           </p>
         );
@@ -204,18 +257,18 @@ export default function InvidiaChat() {
         </p>
       );
     });
-  };
 
-  const handleKeyPress = (e) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSubmit(e);
-    }
+    return (
+      <>
+        {elements}
+        {isStreaming && <BlinkingCursor />}
+      </>
+    );
   };
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, isTyping]);
+  }, [messages]);
 
   useEffect(() => {
     if (showChat && textareaRef.current) {
@@ -225,6 +278,14 @@ export default function InvidiaChat() {
 
   return (
     <>
+      {/* Blink keyframe injected once */}
+      <style>{`
+        @keyframes blink {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0; }
+        }
+      `}</style>
+
       {/* Floating Button */}
       {!showChat && (
         <div
@@ -263,7 +324,7 @@ export default function InvidiaChat() {
             </div>
           </div>
 
-          {/* Error Message */}
+          {/* Error Banner */}
           {error && (
             <div className="mx-4 mt-3 p-3 bg-red-900/20 border border-red-500/30 rounded-lg">
               <p className="text-red-400 text-sm">{error}</p>
@@ -278,13 +339,11 @@ export default function InvidiaChat() {
                 <p className="bg-gradient-to-r from-[#0f2027] via-[#203a43] to-[#2c5364] bg-clip-text text-transparent font-medium mb-2">
                   Welcome to SkillBridge AI!
                 </p>
-                <p className="text-gray-500 text-sm">
-                  How can I help you today?
-                </p>
+                <p className="text-gray-500 text-sm">How can I help you today?</p>
               </div>
             )}
 
-            {messages.map((message, index) => (
+            {messages.map((message) => (
               <div
                 key={message.timestamp}
                 className={`mb-4 ${
@@ -304,8 +363,8 @@ export default function InvidiaChat() {
                     <p className="text-sm leading-relaxed">{message.content}</p>
                   ) : (
                     <div className="text-sm">
-                      {formatResponse(message.content)}
-                      {!message.isError && (
+                      {formatResponse(message.content, message.isStreaming)}
+                      {!message.isError && !message.isStreaming && message.content && (
                         <button
                           onClick={() => copyToClipboard(message.content)}
                           className="mt-2 text-gray-400 hover:text-gray-600 transition-colors"
@@ -320,33 +379,6 @@ export default function InvidiaChat() {
               </div>
             ))}
 
-            {/* Typing Indicator */}
-            {isTyping && (
-              <div className="mb-4 text-left">
-                <div className="inline-block bg-gray-50 border border-gray-200 shadow-sm p-3 rounded-2xl">
-                  <div className="flex items-center gap-1">
-                    <div className="flex gap-1">
-                      <div
-                        className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
-                        style={{ animationDelay: "0ms" }}
-                      ></div>
-                      <div
-                        className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
-                        style={{ animationDelay: "150ms" }}
-                      ></div>
-                      <div
-                        className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
-                        style={{ animationDelay: "300ms" }}
-                      ></div>
-                    </div>
-                    <span className="text-xs text-gray-500 ml-2">
-                      SkillBridge is typing...
-                    </span>
-                  </div>
-                </div>
-              </div>
-            )}
-
             <div ref={messagesEndRef} />
           </div>
 
@@ -358,7 +390,7 @@ export default function InvidiaChat() {
                   ref={textareaRef}
                   value={prompt}
                   onChange={(e) => setPrompt(e.target.value)}
-                  onKeyPress={handleKeyPress}
+                  onKeyDown={handleKeyPress}
                   placeholder="Type your message..."
                   className="w-full p-3 pr-12 rounded-xl border border-gray-600 focus:ring-2 focus:ring-gray-500 focus:border-transparent resize-none max-h-32 text-sm focus:outline-none text-black bg-white placeholder-gray-400 transition-all duration-200"
                   rows="1"
