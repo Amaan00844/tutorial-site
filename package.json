@@ -34,17 +34,18 @@
     "react-markdown": "^10.1.0",
     "react-parallax-tilt": "^1.7.295",
     "react-simple-typewriter": "^5.0.1",
+    "recharts": "^3.10.0",
     "remark-gfm": "^4.0.1",
     "sqlite": "^5.1.1",
     "stackframe": "^1.3.4",
     "tingodb": "^0.6.1",
-    "vite-plugin-monaco-editor": "^1.1.0",
-    "recharts": "^2.12.0"
+    "vite-plugin-monaco-editor": "^1.1.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.0.0",
     "autoprefixer": "^10.4.19",
-    "eslint": "^8.57.1",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "^16.2.11",
     "lightningcss": "^1.24.0",
     "postcss": "^8.4.38",
     "tailwindcss": "^4.1.4"
