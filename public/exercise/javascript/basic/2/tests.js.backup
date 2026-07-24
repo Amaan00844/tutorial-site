@@ -1,0 +1,201 @@
+// Browser-compatible test for JavaScript Basic Exercise 2: Basic Arithmetic Operations
+// This test runs in the Monaco Editor environment
+
+console.log("🧪 Running JavaScript Basic Exercise 2 Tests...");
+
+// Test configuration for Monaco Editor
+const testConfig = {
+  exerciseTitle: "Basic Arithmetic Operations",
+  language: "javascript",
+  requirements: [
+    "Create variables for numeric inputs",
+    "Perform all four basic operations (+, -, *, /)",
+    "Store results in variables",
+    "Display results using console.log",
+    "Include at least one complex expression"
+  ]
+};
+
+// Test functions that work in browser environment
+function runTests(userCode) {
+  const results = {
+    syntaxCheckPassed: false,
+    structureCheckPassed: false,
+    functionalityCheckPassed: false,
+    errors: [],
+    warnings: [],
+    structureChecks: [],
+    score: 0
+  };
+
+  try {
+    // 1. Syntax Check
+    results.syntaxCheckPassed = checkSyntax(userCode, results);
+    
+    // 2. Structure Check
+    results.structureCheckPassed = checkStructure(userCode, results);
+    
+    // 3. Functionality Check
+    results.functionalityCheckPassed = checkFunctionality(userCode, results);
+    
+    // 4. Calculate Score
+    calculateScore(results);
+    
+    return results;
+  } catch (error) {
+    results.errors.push(`Test execution error: ${error.message}`);
+    return results;
+  }
+}
+
+function checkSyntax(code, results) {
+  try {
+    new Function(code);
+    console.log("✅ Syntax check passed");
+    return true;
+  } catch (error) {
+    console.log("❌ Syntax error:", error.message);
+    results.errors.push(`Syntax Error: ${error.message}`);
+    return false;
+  }
+}
+
+function checkStructure(code, results) {
+  let passed = true;
+  
+  // Check for console.log statements
+  const hasConsoleLog = /console\.log\s*\(/.test(code);
+  if (hasConsoleLog) {
+    console.log("✅ Found console.log statement(s)");
+    results.structureChecks.push("✅ Found console.log statement(s)");
+  } else {
+    console.log("❌ No console.log statements found");
+    results.structureChecks.push("❌ No console.log statements found");
+    passed = false;
+  }
+
+  // Check for variable declarations
+  const hasVariables = /\b(let|const|var)\s+\w+/.test(code);
+  if (hasVariables) {
+    console.log("✅ Found variable declarations");
+    results.structureChecks.push("✅ Found variable declarations");
+  } else {
+    console.log("❌ No variable declarations found");
+    results.structureChecks.push("❌ No variable declarations found");
+    passed = false;
+  }
+
+  // Check for arithmetic operations
+  const hasAddition = /\+/.test(code);
+  const hasSubtraction = /-/.test(code);
+  const hasMultiplication = /\*/.test(code);
+  const hasDivision = /\//.test(code);
+
+  let operationCount = 0;
+  if (hasAddition) {
+    console.log("✅ Found addition operation (+)");
+    results.structureChecks.push("✅ Found addition operation (+)");
+    operationCount++;
+  }
+  if (hasSubtraction) {
+    console.log("✅ Found subtraction operation (-)");
+    results.structureChecks.push("✅ Found subtraction operation (-)");
+    operationCount++;
+  }
+  if (hasMultiplication) {
+    console.log("✅ Found multiplication operation (*)");
+    results.structureChecks.push("✅ Found multiplication operation (*)");
+    operationCount++;
+  }
+  if (hasDivision) {
+    console.log("✅ Found division operation (/)");
+    results.structureChecks.push("✅ Found division operation (/)");
+    operationCount++;
+  }
+
+  if (operationCount >= 4) {
+    console.log("✅ Found all four basic operations");
+    results.structureChecks.push("✅ Found all four basic operations");
+  } else {
+    console.log(`❌ Only found ${operationCount} operations (need all 4: +, -, *, /)`);
+    results.structureChecks.push(`❌ Only found ${operationCount} operations (need all 4: +, -, *, /)`);
+    passed = false;
+  }
+
+  // Check for numbers
+  const hasNumbers = /\b\d+(\.\d+)?\b/.test(code);
+  if (hasNumbers) {
+    console.log("✅ Found numeric values");
+    results.structureChecks.push("✅ Found numeric values");
+  } else {
+    console.log("❌ No numeric values found");
+    results.structureChecks.push("❌ No numeric values found");
+    passed = false;
+  }
+
+  return passed;
+}
+
+function checkFunctionality(code, results) {
+  try {
+    // Capture console.log output
+    const logs = [];
+    
+    // Mock console.log to capture output
+    const mockConsole = {
+      log: (...args) => {
+        logs.push(args.map(arg => 
+          typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
+        ).join(' '));
+      }
+    };
+
+    // Execute user code with mocked console
+    const executeCode = new Function('console', code);
+    executeCode(mockConsole);
+
+    if (logs.length > 0) {
+      console.log("✅ Code executed and produced output");
+      results.output = logs.join('\n');
+      
+      // Check if output contains numbers (indicating calculations)
+      const hasNumericOutput = logs.some(log => /\d+/.test(log));
+      if (hasNumericOutput) {
+        console.log("✅ Output contains numeric results");
+        return true;
+      } else {
+        console.log("⚠️ Output doesn't contain numeric results");
+        results.warnings.push("Output doesn't appear to contain calculation results");
+        return true; // Still pass if there's output
+      }
+    } else {
+      console.log("❌ Code executed but produced no output");
+      results.warnings.push("Code executed but produced no console output");
+      return false;
+    }
+  } catch (error) {
+    console.log("❌ Runtime error:", error.message);
+    results.errors.push(`Runtime Error: ${error.message}`);
+    return false;
+  }
+}
+
+function calculateScore(results) {
+  let score = 0;
+  
+  if (results.syntaxCheckPassed) score += 25;
+  if (results.structureCheckPassed) score += 50;
+  if (results.functionalityCheckPassed) score += 25;
+  
+  results.score = Math.min(score, 100);
+  
+  console.log(`📊 Final Score: ${results.score}/100`);
+}
+
+// Export for Monaco Editor testing system
+if (typeof window !== 'undefined') {
+  window.exerciseTest = { runTests, testConfig };
+}
+
+console.log("✅ Test file loaded successfully");
+console.log("Requirements:", testConfig.requirements.join(", "));

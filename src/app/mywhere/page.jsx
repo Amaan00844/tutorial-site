@@ -1,0 +1,16 @@
+
+import MySQLSidebar from "@/components/Mysql/MySQLSidebar";
+import MySQLWhere from "@/components/Mysql/MySQLWhere";
+
+
+
+export default function ExpressJwtPage() {
+  return (
+    <div className="flex">
+      < MySQLSidebar />
+      <main className="flex-1 bg-white min-h-screen">
+        <MySQLWhere />
+      </main>
+    </div>
+  );
+}

@@ -1,0 +1,186 @@
+// Browser-compatible test for JavaScript Basic Exercise 1: Variables and Data Types
+// This test runs in the Monaco Editor environment
+
+console.log("🧪 Running JavaScript Basic Exercise 1 Tests...");
+
+// Test configuration for Monaco Editor
+const testConfig = {
+  exerciseTitle: "Variables and Data Types",
+  language: "javascript",
+  requirements: [
+    "Create variables of different data types",
+    "Use console.log to display variables",
+    "Include string, number, boolean, array, and object variables",
+    "Use proper variable naming conventions"
+  ]
+};
+
+// Test functions that work in browser environment
+function runTests(userCode) {
+  const results = {
+    syntaxCheckPassed: false,
+    structureCheckPassed: false,
+    functionalityCheckPassed: false,
+    errors: [],
+    warnings: [],
+    structureChecks: [],
+    score: 0
+  };
+
+  try {
+    // 1. Syntax Check
+    results.syntaxCheckPassed = checkSyntax(userCode, results);
+    
+    // 2. Structure Check
+    results.structureCheckPassed = checkStructure(userCode, results);
+    
+    // 3. Functionality Check
+    results.functionalityCheckPassed = checkFunctionality(userCode, results);
+    
+    // 4. Calculate Score
+    calculateScore(results);
+    
+    return results;
+  } catch (error) {
+    results.errors.push(`Test execution error: ${error.message}`);
+    return results;
+  }
+}
+
+function checkSyntax(code, results) {
+  try {
+    new Function(code);
+    console.log("✅ Syntax check passed");
+    return true;
+  } catch (error) {
+    console.log("❌ Syntax error:", error.message);
+    results.errors.push(`Syntax Error: ${error.message}`);
+    return false;
+  }
+}
+
+function checkStructure(code, results) {
+  let passed = true;
+  
+  // Check for console.log statements
+  const hasConsoleLog = /console\.log\s*\(/.test(code);
+  if (hasConsoleLog) {
+    console.log("✅ Found console.log statement(s)");
+    results.structureChecks.push("✅ Found console.log statement(s)");
+  } else {
+    console.log("❌ No console.log statements found");
+    results.structureChecks.push("❌ No console.log statements found");
+    passed = false;
+  }
+
+  // Check for variable declarations
+  const hasVariables = /\b(let|const|var)\s+\w+/.test(code);
+  if (hasVariables) {
+    console.log("✅ Found variable declarations");
+    results.structureChecks.push("✅ Found variable declarations");
+  } else {
+    console.log("❌ No variable declarations found");
+    results.structureChecks.push("❌ No variable declarations found");
+    passed = false;
+  }
+
+  // Check for different data types
+  const hasString = /['"`].*['"`]/.test(code);
+  const hasNumber = /\b\d+(\.\d+)?\b/.test(code);
+  const hasBoolean = /\b(true|false)\b/.test(code);
+  const hasArray = /\[.*\]/.test(code);
+  const hasObject = /\{.*\}/.test(code);
+
+  let dataTypeCount = 0;
+  if (hasString) {
+    console.log("✅ Found string literal");
+    results.structureChecks.push("✅ Found string literal");
+    dataTypeCount++;
+  }
+  if (hasNumber) {
+    console.log("✅ Found number literal");
+    results.structureChecks.push("✅ Found number literal");
+    dataTypeCount++;
+  }
+  if (hasBoolean) {
+    console.log("✅ Found boolean literal");
+    results.structureChecks.push("✅ Found boolean literal");
+    dataTypeCount++;
+  }
+  if (hasArray) {
+    console.log("✅ Found array literal");
+    results.structureChecks.push("✅ Found array literal");
+    dataTypeCount++;
+  }
+  if (hasObject) {
+    console.log("✅ Found object literal");
+    results.structureChecks.push("✅ Found object literal");
+    dataTypeCount++;
+  }
+
+  if (dataTypeCount >= 3) {
+    console.log(`✅ Found ${dataTypeCount} different data types`);
+    results.structureChecks.push(`✅ Found ${dataTypeCount} different data types`);
+  } else {
+    console.log(`❌ Only found ${dataTypeCount} data types (need at least 3)`);
+    results.structureChecks.push(`❌ Only found ${dataTypeCount} data types (need at least 3)`);
+    passed = false;
+  }
+
+  return passed;
+}
+
+function checkFunctionality(code, results) {
+  try {
+    // Capture console.log output
+    const logs = [];
+    const originalLog = console.log;
+    
+    // Mock console.log to capture output
+    const mockConsole = {
+      log: (...args) => {
+        logs.push(args.map(arg => 
+          typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
+        ).join(' '));
+      }
+    };
+
+    // Execute user code with mocked console
+    const executeCode = new Function('console', code);
+    executeCode(mockConsole);
+
+    if (logs.length > 0) {
+      console.log("✅ Code executed and produced output");
+      results.output = logs.join('\n');
+      return true;
+    } else {
+      console.log("❌ Code executed but produced no output");
+      results.warnings.push("Code executed but produced no console output");
+      return false;
+    }
+  } catch (error) {
+    console.log("❌ Runtime error:", error.message);
+    results.errors.push(`Runtime Error: ${error.message}`);
+    return false;
+  }
+}
+
+function calculateScore(results) {
+  let score = 0;
+  
+  if (results.syntaxCheckPassed) score += 30;
+  if (results.structureCheckPassed) score += 50;
+  if (results.functionalityCheckPassed) score += 20;
+  
+  results.score = Math.min(score, 100);
+  
+  console.log(`📊 Final Score: ${results.score}/100`);
+}
+
+// Export for Monaco Editor testing system
+if (typeof window !== 'undefined') {
+  window.exerciseTest = { runTests, testConfig };
+}
+
+console.log("✅ Test file loaded successfully");
+console.log("Requirements:", testConfig.requirements.join(", "));

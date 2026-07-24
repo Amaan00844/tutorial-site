@@ -1,0 +1,52 @@
+{
+  "name": "tutorial-site",
+  "version": "0.1.0",
+  "scripts": {
+    "dev": "next dev --turbo",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@babel/parser": "^7.27.3",
+    "@babel/traverse": "^7.27.3",
+    "@google/generative-ai": "^0.24.1",
+    "@heroicons/react": "^2.2.0",
+    "@monaco-editor/react": "^4.7.0",
+    "@stackblitz/sdk": "^1.11.0",
+    "@tsparticles/react": "^3.0.0",
+    "axios": "^1.9.0",
+    "error-stack-parser": "^2.1.4",
+    "esprima": "^4.0.1",
+    "express": "^5.1.0",
+    "font-awesome": "^4.7.0",
+    "framer-motion": "^11.0.0",
+    "lucide-react": "^0.503.0",
+    "monaco-editor": "^0.52.2",
+    "next": "^15.3.1",
+    "react": "^19.1.0",
+    "react-confetti": "^6.4.0",
+    "react-dom": "^19.1.0",
+    "react-feather": "^2.0.10",
+    "react-hot-toast": "^2.5.2",
+    "react-icons": "^5.5.0",
+    "react-intersection-observer": "^9.16.0",
+    "react-markdown": "^10.1.0",
+    "react-parallax-tilt": "^1.7.295",
+    "react-simple-typewriter": "^5.0.1",
+    "remark-gfm": "^4.0.1",
+    "sqlite": "^5.1.1",
+    "stackframe": "^1.3.4",
+    "tingodb": "^0.6.1",
+    "vite-plugin-monaco-editor": "^1.1.0",
+    "recharts": "^2.12.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.0.0",
+    "autoprefixer": "^10.4.19",
+    "eslint": "^8.57.1",
+    "lightningcss": "^1.24.0",
+    "postcss": "^8.4.38",
+    "tailwindcss": "^4.1.4"
+  }
+}
