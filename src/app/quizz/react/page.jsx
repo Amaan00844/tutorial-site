@@ -37,7 +37,7 @@ export default function ReactQuizPage() {
 
   const API_URL =
     process.env.NEXT_PUBLIC_API_URL ||
-    "https://study-portal-backend-9zpf.onrender.com/";
+    "https://study-portal-backend-9zpf.onrender.com";
   const WEBSITE_URL =
     process.env.NEXT_PUBLIC_WEBSITE_URL ||
     "https://skill2future.code4bharat.com";

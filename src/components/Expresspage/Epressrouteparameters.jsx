@@ -10,7 +10,7 @@ function ExpressRouteParameters() {
   useReadingTracker("expressparams");
   const API_BASE_URL =
     process.env.NEXT_PUBLIC_API_URL ||
-    "https://study-portal-backend-9zpf.onrender.com/";
+    "https://study-portal-backend-9zpf.onrender.com";
   const [showGemini, setShowGemini] = useState(false);
   const [prompt, setPrompt] = useState("");
   const [response, setResponse] = useState("");
