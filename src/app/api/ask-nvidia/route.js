@@ -1,5 +1,5 @@
 const NVIDIA_MODEL =
-  process.env.NVIDIA_MODEL || "mistralai/mistral-medium-3.5-128b";
+  process.env.NVIDIA_MODEL || "meta/llama-3.2-3b-instruct";
 const NVIDIA_URL = "https://integrate.api.nvidia.com/v1/chat/completions";
 
 export async function POST(request) {
