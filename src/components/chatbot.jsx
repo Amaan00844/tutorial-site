@@ -3,9 +3,6 @@ import { BsChatDots, BsArrowUp, BsTrash, BsCopy } from "react-icons/bs";
 import { PiFlowerLotusDuotone, PiSpinnerGap } from "react-icons/pi";
 
 export default function InvidiaChat() {
-  const API_BASE_URL =
-    process.env.NEXT_PUBLIC_API_URL ||
-    "https://study-portal-backend-9zpf.onrender.com";
   const [showChat, setShowChat] = useState(false);
   const [prompt, setPrompt] = useState("");
   const [messages, setMessages] = useState([]);
@@ -33,7 +30,7 @@ export default function InvidiaChat() {
     setIsTyping(true);
 
     try {
-      const res = await fetch(`${API_BASE_URL}/api/ask-gemini/`, {
+      const res = await fetch("/api/ask-nvidia", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ prompt: currentPrompt }),
